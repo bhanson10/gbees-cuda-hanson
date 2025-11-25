@@ -20,7 +20,7 @@ char mDirCr3bp[] = "./measurements/CR3BP";
 char mFileCr3bp[] = "measurement0.txt";
 
 // trajectory coefficients
-__device__ static const double coef[] = {2.528017528540000E-5}; // CR3BP trajectory attributes (mu)
+__device__ static const double coef[] = {1.901109735892602E-7}; // CR3BP trajectory attributes (mu)
 
 /** 
  * @brief Get CR3BP default configuration
@@ -36,14 +36,14 @@ void configureCr3bp(Model* model){
     model->mDir = mDirCr3bp;      // Measurement path
     model->mFile = mFileCr3bp;    // Measurement file        
     model->mDim = 6;                 // Measurement dimension
-    model->numDistRecorded = 17;      // Number of distributions recorded per measurement
+    model->numDistRecorded = 2;      // Number of distributions recorded per measurement
     model->recordDivider = 1;        // Use a value greater than 1 to record only a fraction of the total distributions
     model->recordSelected = 0;       // Select which fraction of the total records are recorded
     model->numMeasurements = 1;      // Number of measurements
     model->deletePeriodSteps = 20;   // Number of steps per deletion procedure
     model->outputPeriodSteps = 20;   // Number of steps per output to terminal
     model->performOutput = true;     // Write info to terminal
-    model->performRecord = false;     // Write PDFs to .txt file
+    model->performRecord = true;     // Write PDFs to .txt file
     model->performMeasure = false;    // Take discrete measurement updates
     model->useBounds = true;        // Add inadmissible regions to grid
     model->configureGrid = &configureGridCr3bp; // Grid configuration callback
@@ -85,7 +85,8 @@ __device__ static void fCr3bp(double* f, double* x, double* dx){
 __device__ static double jCr3bp(double* x){    
     double r1 = pow(pow(x[0]+coef[0],2)+pow(x[1],2)+pow(x[2],2), 0.5);
     double r2 = pow(pow(x[0]-1+coef[0],2)+pow(x[1],2)+pow(x[2],2), 0.5);
-    double J = pow(x[0], 2.0) + pow(x[1], 2.0) + (2*(1-coef[0])/r1) + (2*coef[0]/r2) + coef[0]*(1 - coef[0]) - (pow(x[3], 2.0) + pow(x[4], 2.0) + pow(x[5], 2.0));
+    // double J = pow(x[0], 2.0) + pow(x[1], 2.0) + (2*(1-coef[0])/r1) + (2*coef[0]/r2) + coef[0]*(1 - coef[0]) - (pow(x[3], 2.0) + pow(x[4], 2.0) + pow(x[5], 2.0));
+    double J = (1/2)*(pow(x[3], 2.0) + pow(x[4], 2.0) + pow(x[5], 2.0)) - (1/2)*(pow(x[0], 2.0) + pow(x[1], 2.0))-((1-coef[0])/r1)-(coef[0]/r2); 
     return J;
 }
 
@@ -97,7 +98,7 @@ __device__ static double jCr3bp(double* x){
  */
 static void configureGridCr3bp(GridDefinition *grid, Measurement *firstMeasurement){    
     grid->dt = DBL_MAX;
-    grid->threshold = 1E-7;    
+    grid->threshold = 1E-10;    
     grid->hi_bound = DBL_MAX;
     grid->lo_bound = -DBL_MAX;    
     

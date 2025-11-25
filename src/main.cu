@@ -102,9 +102,9 @@ static void executeGbees(int device){
     Model model;
     
     // configure model
-    configureLorenz3D(&model);
+    // configureLorenz3D(&model);
     //configurePcr3bp(&model);
-    //configureCr3bp(&model);
+    configureCr3bp(&model);
     //configureLorenz6D(&model);
     
     // allocate measurements memory
