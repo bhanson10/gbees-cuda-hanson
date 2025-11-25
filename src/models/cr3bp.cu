@@ -85,8 +85,7 @@ __device__ static void fCr3bp(double* f, double* x, double* dx){
 __device__ static double jCr3bp(double* x){    
     double r1 = pow(pow(x[0]+coef[0],2)+pow(x[1],2)+pow(x[2],2), 0.5);
     double r2 = pow(pow(x[0]-1+coef[0],2)+pow(x[1],2)+pow(x[2],2), 0.5);
-    // double J = pow(x[0], 2.0) + pow(x[1], 2.0) + (2*(1-coef[0])/r1) + (2*coef[0]/r2) + coef[0]*(1 - coef[0]) - (pow(x[3], 2.0) + pow(x[4], 2.0) + pow(x[5], 2.0));
-    double J = (1/2)*(pow(x[3], 2.0) + pow(x[4], 2.0) + pow(x[5], 2.0)) - (1/2)*(pow(x[0], 2.0) + pow(x[1], 2.0))-((1-coef[0])/r1)-(coef[0]/r2); 
+    double J = pow(x[0], 2.0) + pow(x[1], 2.0) + (2*(1-coef[0])/r1) + (2*coef[0]/r2) + coef[0]*(1 - coef[0]) - (pow(x[3], 2.0) + pow(x[4], 2.0) + pow(x[5], 2.0));
     return J;
 }
 
