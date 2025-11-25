@@ -247,7 +247,7 @@ __global__ void gbeesKernel(int iterations, Model model, Global global, Snapshot
                 checkCflCondition(offset, iterations, localArray, global.gridDefinition, &global);             
                                   
                 if(threadIdx.x == 0 && blockIdx.x == 0){
-                    global.gridDefinition->dt = fmin(global.gridDefinition->dt, recordTime - rt);
+                    global.gridDefinition->dt = fminf(global.gridDefinition->dt, recordTime - rt);
                 }
  
                 g.sync();
@@ -468,7 +468,7 @@ static __device__ void initializeGridBoundary(int offset, int iterations, float*
         Cell* cell = getCell(usedIndex, global->grid);        
         if(cell != NULL && cell->bound_val < boundaryValue) boundaryValue = cell->bound_val;
     }
-    gridBounds(&gridDefinition->lo_bound, localArray, global->reductionArray, boundaryValue, fmin);
+    gridBounds(&gridDefinition->lo_bound, localArray, global->reductionArray, boundaryValue, fminf);
 }
 
 /** Compute step dt */
@@ -480,7 +480,7 @@ static __device__ void checkCflCondition(int offset, int iterations, float* loca
         Cell* cell = getCell(usedIndex, global->grid);        
         if(cell != NULL && cell->cfl_dt < minDt) minDt = cell->cfl_dt;
     }    
-    gridBounds(&gridDefinition->dt, localArray, global->reductionArray, minDt, fmin);    
+    gridBounds(&gridDefinition->dt, localArray, global->reductionArray, minDt, fminf);    
 }
 
 /** Normalize probability distribution */
@@ -968,16 +968,16 @@ static __device__ void godunovMethod(int offset, int iterations, GridDefinition*
 }
 
 static __device__ float uPlus(float v){
-  return fmax(v, 0.0);
+  return fmaxf(v, 0.0f);
 }
 
 static __device__ float uMinus(float v){
-  return fmin(v, 0.0);
+  return fminf(v, 0.0f);
 }
 
 static __device__ float fluxLimiter(float th) {
-  float min1 = fmin((1 + th)/2.0, 2.0);
-  return fmax(0.0, fmin(min1, 2*th)); 
+  float min1 = fminf((1 + th)/2.0, 2.0f);
+  return fmaxf(0.0f, fminf(min1, 2*th)); 
 }
 
 static __device__ void updateDcu(Cell* cell, Grid* grid, GridDefinition* gridDefinition) {    
@@ -1073,7 +1073,7 @@ static __device__ void updateProbabilityCell(Cell* cell, Grid* grid, GridDefinit
             (gridDefinition->dt / gridDefinition->dx[i]) * (cell->ctu[i] - iCell->ctu[i]):
             (gridDefinition->dt / gridDefinition->dx[i]) * (cell->ctu[i]);         
     }        
-    cell->prob = fmax(cell->prob, 0.0);        
+    cell->prob = fmaxf(cell->prob, 0.0f);        
 }
 
 /** Apply measurement */
