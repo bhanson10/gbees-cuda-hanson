@@ -97,7 +97,7 @@ __device__ static float jCr3bp(float* x){
  */
 static void configureGridCr3bp(GridDefinition *grid, Measurement *firstMeasurement){    
     grid->dt = DBL_MAX;
-    grid->threshold = 8E-10;    
+    grid->threshold = 3E-10;    
     grid->hi_bound = DBL_MAX;
     grid->lo_bound = -DBL_MAX;    
     
