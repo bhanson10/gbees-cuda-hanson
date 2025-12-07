@@ -45,7 +45,7 @@ void configureCr3bp(Model* model){
     model->performOutput = true;     // Write info to terminal
     model->performRecord = true;     // Write PDFs to .txt file
     model->performMeasure = false;    // Take discrete measurement updates
-    model->useBounds = true;        // Add inadmissible regions to grid
+    model->useBounds = false;        // Add inadmissible regions to grid
     model->configureGrid = &configureGridCr3bp; // Grid configuration callback
     
     HANDLE_CUDA(cudaMalloc(&model->callbacks, sizeof(Callbacks)));
@@ -56,7 +56,7 @@ void configureCr3bp(Model* model){
 __global__ static void initializeCallbacksCr3bp(Callbacks* callbacks){
     callbacks->f = fCr3bp;
     callbacks->z = NULL;  
-    callbacks->j = jCr3bp;
+    callbacks->j = NULL;
 }
 
 /**
