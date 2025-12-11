@@ -15,7 +15,7 @@ __device__ static double jCr3bp(double* x);
 __global__ static void initializeCallbacksCr3bp(Callbacks* model);
 
 /** Default configuration parameters for CR3BP */
-char pDirCr3bp[] = "./results";
+char pDirCr3bp[] = "./results/CR3BP";
 char mDirCr3bp[] = "./measurements/CR3BP";
 char mFileCr3bp[] = "measurement0.txt";
 
@@ -97,7 +97,7 @@ __device__ static double jCr3bp(double* x){
  */
 static void configureGridCr3bp(GridDefinition *grid, Measurement *firstMeasurement){    
     grid->dt = DBL_MAX;
-    grid->threshold = 5E-9;    
+    grid->threshold = 9E-9;    
     grid->hi_bound = DBL_MAX;
     grid->lo_bound = -DBL_MAX;    
     

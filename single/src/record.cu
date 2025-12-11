@@ -68,7 +68,8 @@ static void recordDistribution(Snapshot* snapshotsHost, Snapshot* snapshotsDevic
     for(uint32_t usedIndex = 0; usedIndex < snapshot.usedSize; usedIndex++){
         uint32_t heapIndex = usedList[usedIndex].heapIndex;
         SnapshotCell* cell = &heap[heapIndex];
-        if(cell->prob > threshold){
+        if(cell->prob > 0){
+        // if(cell->prob > threshold){
             recordCell(&heap[heapIndex], fd);                    
         } 
     }    
