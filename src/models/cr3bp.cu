@@ -36,16 +36,16 @@ void configureCr3bp(Model* model){
     model->mDir = mDirCr3bp;      // Measurement path
     model->mFile = mFileCr3bp;    // Measurement file        
     model->mDim = 6;                 // Measurement dimension
-    model->numDistRecorded = 17;      // Number of distributions recorded per measurement
+    model->numDistRecorded = 2;      // Number of distributions recorded per measurement
     model->recordDivider = 1;        // Use a value greater than 1 to record only a fraction of the total distributions
     model->recordSelected = 0;       // Select which fraction of the total records are recorded
     model->numMeasurements = 1;      // Number of measurements
     model->deletePeriodSteps = 20;   // Number of steps per deletion procedure
     model->outputPeriodSteps = 20;   // Number of steps per output to terminal
     model->performOutput = true;     // Write info to terminal
-    model->performRecord = false;     // Write PDFs to .txt file
+    model->performRecord = true;     // Write PDFs to .txt file
     model->performMeasure = false;    // Take discrete measurement updates
-    model->useBounds = true;        // Add inadmissible regions to grid
+    model->useBounds = false;        // Add inadmissible regions to grid
     model->configureGrid = &configureGridCr3bp; // Grid configuration callback
     
     HANDLE_CUDA(cudaMalloc(&model->callbacks, sizeof(Callbacks)));
@@ -97,7 +97,7 @@ __device__ static double jCr3bp(double* x){
  */
 static void configureGridCr3bp(GridDefinition *grid, Measurement *firstMeasurement){    
     grid->dt = DBL_MAX;
-    grid->threshold = 1E-7;    
+    grid->threshold = 5E-10;    
     grid->hi_bound = DBL_MAX;
     grid->lo_bound = -DBL_MAX;    
     
