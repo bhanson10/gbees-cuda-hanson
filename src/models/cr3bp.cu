@@ -20,7 +20,7 @@ char mDirCr3bp[] = "./measurements/CR3BP";
 char mFileCr3bp[] = "measurement0.txt";
 
 // trajectory coefficients
-__device__ static const double coef[] = {2.528017528540000E-5}; // CR3BP trajectory attributes (mu)
+__device__ static const double coef[] = {1.901109735892602E-7}; // CR3BP trajectory attributes (mu)
 
 /** 
  * @brief Get CR3BP default configuration
@@ -56,7 +56,7 @@ void configureCr3bp(Model* model){
 __global__ static void initializeCallbacksCr3bp(Callbacks* callbacks){
     callbacks->f = fCr3bp;
     callbacks->z = NULL;  
-    callbacks->j = jCr3bp;
+    callbacks->j = NULL;
 }
 
 /**
