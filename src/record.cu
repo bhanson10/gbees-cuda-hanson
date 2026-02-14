@@ -62,6 +62,7 @@ static void recordDistribution(Snapshot* snapshotsHost, Snapshot* snapshotsDevic
     fwrite(&snapshot.time, sizeof(snapshot.time), 1, fd);
     
     // record cells
+    uint32_t writeCount = 0;
     for(uint32_t usedIndex = 0; usedIndex < snapshot.usedSize; usedIndex++){
         uint32_t heapIndex = usedList[usedIndex].heapIndex;
         SnapshotCell* cell = &heap[heapIndex];
