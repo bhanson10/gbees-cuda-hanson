@@ -4,9 +4,6 @@
 #include "error.h"
 #include "macro.h"
 
-/** Record one cell */
-static void recordCell(SnapshotCell* cell, FILE* fd);
-
 /** Record one distribution */
 static void recordDistribution(Snapshot* snapshotsHost, Snapshot* snapshotsDevice, Model* model, int gridSize, int nm, int nr, double threshold);
 
@@ -31,7 +28,7 @@ void recordDistributions(Snapshot* snapshotsHost, Snapshot* snapshotsDevice, Mod
 static void recordDistribution(Snapshot* snapshotsHost, Snapshot* snapshotsDevice, Model* model, int gridSize, int nm, int nr, double threshold){
     Snapshot snapshot;
     int index = nr + nm * model->numDistRecorded;
-    
+
     // check if should be generated
     int mod = index % model->recordDivider;
     if(mod != model->recordSelected) return;
@@ -41,80 +38,64 @@ static void recordDistribution(Snapshot* snapshotsHost, Snapshot* snapshotsDevic
 
     // copy snapshot from device to host
     HANDLE_CUDA( cudaMemcpy( &snapshot, &snapshotsDevice[snapshotIndex], sizeof(Snapshot), cudaMemcpyDeviceToHost) );
-    
+
     // alloc host memory
     UsedListEntry* usedList = (UsedListEntry*)malloc(gridSize * sizeof(UsedListEntry));
     SnapshotCell* heap = (SnapshotCell*)malloc(gridSize * sizeof(SnapshotCell));
     
-    assertNotNull(usedList, MALLOC_ERROR, "Error allocating host memory for record distribution");
-    assertNotNull(heap, MALLOC_ERROR, "Error allocating host memory for record distribution");
-    
+    assertNotNull(usedList, MALLOC_ERROR, "Error allocating host memory");
+    assertNotNull(heap, MALLOC_ERROR, "Error allocating host memory");
+
     // copy snapshot from device to host
-    HANDLE_CUDA( cudaMemcpy( usedList, snapshot.usedList, gridSize * sizeof(UsedListEntry), cudaMemcpyDeviceToHost) );
-    HANDLE_CUDA( cudaMemcpy( heap, snapshot.heap, gridSize * sizeof(SnapshotCell), cudaMemcpyDeviceToHost) );
-    
-    // output file
-    char fileName[200];        
-    snprintf(fileName, sizeof(fileName), "%s/P%d_pdf_%d.bin", model->pDir, nm, nr);    
+    HANDLE_CUDA( cudaMemcpy( usedList, snapshot.usedList, gridSize * sizeof(UsedListEntry), cudaMemcpyDeviceToHost));
+    HANDLE_CUDA( cudaMemcpy( heap, snapshot.heap, gridSize * sizeof(SnapshotCell), cudaMemcpyDeviceToHost));
+
+    // output file    
+    char fileName[200];
+    snprintf(fileName, sizeof(fileName), "%s/P%d_pdf_%d.bin", model->pDir, nm, nr);
     FILE* fd = fopen(fileName, "wb");
     assertNotNull(fd, IO_ERROR, "Error opening output file");
-        
+
     log("Record grid for time %f with %d cells to file %s\n", snapshot.time, snapshot.usedSize, fileName);
-    
+
     // record time
-    fwrite(&snapshot.time, sizeof(snapshot.time), 1, fd);
-    
-    // record cells
+    double time = snapshot.time;
+    fwrite(&time, sizeof(double), 1, fd);
+
+    // count cells
     uint32_t writeCount = 0;
     for(uint32_t usedIndex = 0; usedIndex < snapshot.usedSize; usedIndex++){
         uint32_t heapIndex = usedList[usedIndex].heapIndex;
         SnapshotCell* cell = &heap[heapIndex];
-        if(cell->prob >= threshold){
-            writeCount++;              
-        } 
+        if(cell->prob >= threshold)
+            writeCount++;
     }
-    
+
     fwrite(&writeCount, sizeof(uint32_t), 1, fd);
 
-    for (uint32_t usedIndex = 0; usedIndex < snapshot.usedSize; usedIndex++){
-        uint32_t heapIndex = usedList[usedIndex].heapIndex;
-        SnapshotCell* cell = &heap[heapIndex];
-        if(cell->prob >= threshold){
-            fwrite(&cell->prob, sizeof(double), 1, fd);
-            fwrite(cell->x, sizeof(double), DIM, fd);
-        }
-    }
-    fclose(fd);
-
-    snprintf(fileName, sizeof(fileName), "%s/P%d_pdf_%d.txt", model->pDir, nm, nr);    
-    fd = fopen(fileName, "w");
-    assertNotNull(fd, IO_ERROR, "Error opening output file");
-        
-    log("Record grid for time %f with %d cells to file %s\n", snapshot.time, snapshot.usedSize, fileName);
-    
-    // record time
-    fprintf(fd, "%f\n", snapshot.time);
-    
     // record cells
     for(uint32_t usedIndex = 0; usedIndex < snapshot.usedSize; usedIndex++){
+    
         uint32_t heapIndex = usedList[usedIndex].heapIndex;
         SnapshotCell* cell = &heap[heapIndex];
-        if(cell->prob > threshold){
-            recordCell(&heap[heapIndex], fd);                    
-        } 
-    }    
-    fclose(fd);
     
+        if(cell->prob >= threshold){
+    
+    #ifdef SINGLE_PRECISION_SNAPSHOTS
+            float prob = cell->prob;
+            fwrite(&prob, sizeof(float), 1, fd);
+            fwrite(cell->x, sizeof(float), DIM, fd);
+    
+    #else
+            double prob = cell->prob;
+            fwrite(&prob, sizeof(double), 1, fd);
+            fwrite(cell->x, sizeof(double), DIM, fd);
+    
+    #endif
+        }
+    }
+
     // free host memory
     free(usedList);
-    free(heap);    
-}
-
-/** Record one cell */
-static void recordCell(SnapshotCell* cell, FILE* fd){
-    fprintf(fd, "%.10e", cell->prob);
-    for (int i=0; i<DIM; i++) {
-        fprintf(fd, " %.10e", cell->x[i]);
-    }
-    fprintf(fd, "\n");    
+    free(heap);
 }
