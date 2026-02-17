@@ -4,6 +4,9 @@
 #include "error.h"
 #include "macro.h"
 
+/** Record one cell */
+static void recordCell(SnapshotCell* cell, FILE* fd);
+
 /** Record one distribution */
 static void recordDistribution(Snapshot* snapshotsHost, Snapshot* snapshotsDevice, Model* model, int gridSize, int nm, int nr, double threshold);
 
@@ -76,16 +79,42 @@ static void recordDistribution(Snapshot* snapshotsHost, Snapshot* snapshotsDevic
     for (uint32_t usedIndex = 0; usedIndex < snapshot.usedSize; usedIndex++){
         uint32_t heapIndex = usedList[usedIndex].heapIndex;
         SnapshotCell* cell = &heap[heapIndex];
-
         if(cell->prob >= threshold){
             fwrite(&cell->prob, sizeof(double), 1, fd);
             fwrite(cell->x, sizeof(double), DIM, fd);
         }
     }
+    fclose(fd);
+
+    snprintf(fileName, sizeof(fileName), "%s/P%d_pdf_%d.txt", model->pDir, nm, nr);    
+    fd = fopen(fileName, "w");
+    assertNotNull(fd, IO_ERROR, "Error opening output file");
+        
+    log("Record grid for time %f with %d cells to file %s\n", snapshot.time, snapshot.usedSize, fileName);
     
+    // record time
+    fprintf(fd, "%f\n", snapshot.time);
+    
+    // record cells
+    for(uint32_t usedIndex = 0; usedIndex < snapshot.usedSize; usedIndex++){
+        uint32_t heapIndex = usedList[usedIndex].heapIndex;
+        SnapshotCell* cell = &heap[heapIndex];
+        if(cell->prob > threshold){
+            recordCell(&heap[heapIndex], fd);                    
+        } 
+    }    
     fclose(fd);
     
     // free host memory
     free(usedList);
     free(heap);    
+}
+
+/** Record one cell */
+static void recordCell(SnapshotCell* cell, FILE* fd){
+    fprintf(fd, "%.10e", cell->prob);
+    for (int i=0; i<DIM; i++) {
+        fprintf(fd, " %.10e", cell->x[i]);
+    }
+    fprintf(fd, "\n");    
 }
