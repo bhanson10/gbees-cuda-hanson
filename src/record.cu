@@ -81,17 +81,17 @@ static void recordDistribution(Snapshot* snapshotsHost, Snapshot* snapshotsDevic
     
         if(cell->prob >= threshold){
     
-    #ifdef SINGLE_PRECISION_SNAPSHOTS
-            float prob = cell->prob;
-            fwrite(&prob, sizeof(float), 1, fd);
-            fwrite(cell->x, sizeof(float), DIM, fd);
-    
-    #else
-            double prob = cell->prob;
-            fwrite(&prob, sizeof(double), 1, fd);
-            fwrite(cell->x, sizeof(double), DIM, fd);
-    
-    #endif
+            #ifdef SINGLE_PRECISION_SNAPSHOTS
+                    float prob = cell->prob;
+                    fwrite(&prob, sizeof(float), 1, fd);
+                    fwrite(cell->x, sizeof(float), DIM, fd);
+            
+            #else
+                    double prob = cell->prob;
+                    fwrite(&prob, sizeof(double), 1, fd);
+                    fwrite(cell->x, sizeof(double), DIM, fd);
+            
+            #endif
         }
     }
 
