@@ -8,12 +8,12 @@ GBEES is a method for propagating uncertainty in systems with nonlinear dynamics
 In a computer with the git client installed, clone the repository by using:
 
 ```
-git clone https://github.com/Cx-Rubio/gbees-cuda.git
+git clone https://github.com/bhanson10/gbees-cuda-hanson.git
 ```
 
 Alternatively you can download the code in a zip file from the downloads page: 
 
-https://github.com/Cx-Rubio/gbees-cuda/archive/refs/heads/main.zip
+https://github.com/bhanson10/gbees-cuda-hanson/archive/refs/heads/main.zip
 
 ## Launch Configuration
 
