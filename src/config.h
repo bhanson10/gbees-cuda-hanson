@@ -24,7 +24,7 @@
 /** Number of cells that process one thread */
 // #define CELLS_PER_THREAD 1 // Lorenz3D
 // #define CELLS_PER_THREAD 9 // PCR3BP
-#define CELLS_PER_THREAD 2000 // CR3BP
+#define CELLS_PER_THREAD 1500 // CR3BP
 // #define CELLS_PER_THREAD 350 // Lorenz6D
 
 /** Enable logs (comment out to disable logs) */
